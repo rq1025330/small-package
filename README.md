@@ -1,4 +1,4 @@
-#感谢 ***kenzok8*** 仓库源码
+#感谢 ***kenzok8*** 仓库源码#
 #### small-package
 
 *  常用OpenWrt软件包源码合集，同步上游更新！
