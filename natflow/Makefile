@@ -9,10 +9,10 @@ include $(TOPDIR)/rules.mk
 include $(INCLUDE_DIR)/kernel.mk
 
 PKG_NAME:=natflow
-PKG_VERSION:=20221013
+PKG_VERSION:=20221124
 
 PKG_SOURCE_URL:=https://codeload.github.com/ptpt52/natflow/tar.gz/$(PKG_VERSION)?
-PKG_HASH:=fd9010e21ba6536c37d061e9f4fcc7bdb542f537e5e0e5aaa1a1e8914afc9b9e
+PKG_HASH:=d760373b41900534b3714a4d3f28e5e1745b0aa397e84576797860f3691fd774
 PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION).tar.gz
 
 PKG_MAINTAINER:=Chen Minqiang <ptpt52@gmail.com>
@@ -30,7 +30,7 @@ define KernelPackage/natflow
 	    CONFIG_NF_FLOW_TABLE
   FILES:=$(PKG_BUILD_DIR)/natflow.ko
   AUTOLOAD:=$(call AutoLoad,96,natflow)
-  DEPENDS:= +kmod-ipt-conntrack +kmod-ipt-nat +kmod-ipt-ipset +kmod-br-netfilter
+  DEPENDS:= +kmod-ipt-conntrack +kmod-ipt-nat +kmod-ipt-ipset +kmod-br-netfilter +LINUX_5_4:kmod-nf-flow
 endef
 
 define KernelPackage/natflow/description
@@ -51,6 +51,7 @@ define Build/Compile/natflow
 		ARCH="$(LINUX_KARCH)" \
 		CROSS_COMPILE="$(KERNEL_CROSS)" \
 		M="$(PKG_BUILD_DIR)" \
+		$(if $(CONFIG_KERNEL_DEBUG_INFO),,NO_DEBUG=1) \
 		modules
 endef
 

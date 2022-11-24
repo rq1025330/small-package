@@ -313,8 +313,13 @@ local function vmess_outbound(server, tag)
 end
 
 local function vless_outbound(server, tag)
-    local flow = server.vless_flow
-    if server.vless_flow == "none" then
+    local flow = nil
+    if server.vless_tls == "xtls" then
+        flow = server.vless_flow
+    elseif server.vless_tls == "tls" then
+        flow = server.vless_flow_tls
+    end
+    if flow == "none" then
         flow = nil
     end
     local streamSettings, dialerProxy = stream_settings(server, "vless", true, tag)
@@ -341,8 +346,11 @@ local function vless_outbound(server, tag)
 end
 
 local function trojan_outbound(server, tag)
-    local flow = server.trojan_flow
-    if server.trojan_flow == "none" then
+    local flow = nil
+    if server.trojan_tls == "xtls" then
+        flow = server.trojan_flow
+    end
+    if flow == "none" then
         flow = nil
     end
     local streamSettings, dialerProxy = stream_settings(server, "trojan", true, tag)
@@ -496,6 +504,13 @@ local function tls_inbound_settings()
 end
 
 local function https_trojan_inbound()
+    local flow = nil
+    if proxy.trojan_tls == "xtls" then
+        flow = proxy.trojan_flow
+    end
+    if flow == "none" then
+        flow = nil
+    end
     return {
         port = proxy.web_server_port or 443,
         protocol = "trojan",
@@ -504,7 +519,7 @@ local function https_trojan_inbound()
             clients = {
                 {
                     password = proxy.web_server_password,
-                    flow = proxy.trojan_tls == "xtls" and proxy.trojan_flow or nil
+                    flow = flow
                 }
             },
             fallbacks = fallbacks()
@@ -519,6 +534,15 @@ local function https_trojan_inbound()
 end
 
 local function https_vless_inbound()
+    local flow = nil
+    if proxy.vless_tls == "xtls" then
+        flow = proxy.vless_flow
+    elseif proxy.vless_tls == "tls" then
+        flow = proxy.vless_flow_tls
+    end
+    if flow == "none" then
+        flow = nil
+    end
     return {
         port = proxy.web_server_port or 443,
         protocol = "vless",
@@ -527,7 +551,7 @@ local function https_vless_inbound()
             clients = {
                 {
                     id = proxy.web_server_password,
-                    flow = proxy.vless_tls == "xtls" and proxy.vless_flow or nil
+                    flow = flow
                 }
             },
             decryption = "none",
@@ -554,8 +578,8 @@ end
 
 local function dns_server_inbounds()
     local result = {}
+    local default_dns_ip, default_dns_port = split_ipv4_host_port(proxy.default_dns, 53)
     for i = proxy.dns_port, proxy.dns_port + (proxy.dns_count or 0), 1 do
-        local default_dns_ip, default_dns_port = split_ipv4_host_port(proxy.default_dns, 53)
         table.insert(result, {
             port = i,
             protocol = "dokodemo-door",
