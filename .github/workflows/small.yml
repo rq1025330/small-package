@@ -22,7 +22,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        target: [main]
+        target: [master]
 
     steps:
     - name: Checkout
